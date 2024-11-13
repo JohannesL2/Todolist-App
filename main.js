@@ -1,11 +1,14 @@
 const addTaskInput = document.getElementById("addTaskInput");
 const addTaskBtn = document.getElementById("addTaskBtn");
 const resetBtn = document.getElementById("resetBtn");
+const ErrorMessages = (document.getElementById("errorMessages").style.color =
+  "red");
 
 addTaskBtn.addEventListener("click", () => {
   if (addTaskInput.value === "") {
-    alert("Du måste skriva något!");
+    errorMessages.innerHTML = "Får ej skapa tomma sysslor";
   } else {
+    errorMessages.innerHTML = "";
     var addTaskList = document.getElementById("addTaskList");
     var addTaskListItem = document.createElement("li");
     addTaskListItem.appendChild(
@@ -35,8 +38,10 @@ addTaskBtn.addEventListener("click", () => {
 
   changeTaskBtn.addEventListener("click", () => {
     if (addTaskInput.value === "") {
-      alert("Skriv vad du vill ändra texten till");
+      errorMessages.innerHTML = "Får ej ändra till en tom syssla";
+      errorMessages.style;
     } else {
+      errorMessages.innerHTML = "";
       addTaskListItem.textContent = addTaskInput.value;
       addTaskListItem.appendChild(changeTaskBtn);
       addTaskListItem.appendChild(completeTaskBtn);

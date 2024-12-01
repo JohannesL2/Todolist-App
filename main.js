@@ -1,75 +1,120 @@
-const addTaskInput = document.getElementById("addTaskInput");
-const addTaskBtn = document.getElementById("addTaskBtn");
-const resetBtn = document.getElementById("resetBtn");
-const ErrorMessages = (document.getElementById("errorMessages").style.color =
-  "red");
+class TaskManager {
+  constructor() {
+    this.addTaskInput = document.getElementById("addTaskInput");
+    this.addTaskBtn = document.getElementById("addTaskBtn");
+    this.resetBtn = document.getElementById("resetBtn");
+    this.errorMessages = document.getElementById("errorMessages");
+    this.addTaskList = document.getElementById("addTaskList");
+    this.completedTaskList = document.getElementById("completedTaskList");
 
-addTaskBtn.addEventListener("click", () => {
-  if (addTaskInput.value === "") {
-    errorMessages.innerHTML = "Får ej skapa tomma sysslor";
-  } else {
-    errorMessages.innerHTML = "";
-    var addTaskList = document.getElementById("addTaskList");
-    var addTaskListItem = document.createElement("li");
-    addTaskListItem.appendChild(
-      document.createTextNode(`${addTaskInput.value}`)
+    this.addTaskBtn.addEventListener("click", () => this.addTask());
+    this.resetBtn.addEventListener("click", () => this.resetTasks());
+    this.addTaskInput.addEventListener("keyup", (event) =>
+      this.handleKeyUp(event)
     );
-    addTaskList.appendChild(addTaskListItem);
-    addTaskInput.value = "";
+
+    this.errorMessages.style.color = "red";
   }
 
-  var changeTaskBtn = document.createElement("button");
-  var completeTaskBtn = document.createElement("button");
-  var removeTaskBtn = document.createElement("button");
-  var removeCompletedTaskBtn = document.createElement("button");
-  var completedTaskList = document.getElementById("completedTaskList");
+  addTask() {
+    const taskValue = this.addTaskInput.value.trim();
 
-  changeTaskBtn.textContent = "Change✏️";
-  completeTaskBtn.textContent = "Complete✅";
-  removeTaskBtn.textContent = "Remove❌";
-  removeCompletedTaskBtn.textContent = "Remove❌";
-  addTaskListItem.appendChild(changeTaskBtn);
-  addTaskListItem.appendChild(completeTaskBtn);
-  addTaskListItem.appendChild(removeTaskBtn);
-
-  removeTaskBtn.addEventListener("click", () => {
-    addTaskList.removeChild(addTaskListItem);
-  });
-
-  changeTaskBtn.addEventListener("click", () => {
-    if (addTaskInput.value === "") {
-      errorMessages.innerHTML = "Får ej ändra till en tom syssla";
-      errorMessages.style;
+    if (taskValue === "") {
+      this.showError("Får ej skapa tomma sysslor");
     } else {
-      errorMessages.innerHTML = "";
-      addTaskListItem.textContent = addTaskInput.value;
-      addTaskListItem.appendChild(changeTaskBtn);
-      addTaskListItem.appendChild(completeTaskBtn);
-      addTaskListItem.appendChild(removeTaskBtn);
-      addTaskInput.value = "";
+      this.clearError();
+      const taskItem = this.createTaskItem(taskValue);
+      this.addTaskList.appendChild(taskItem);
+      this.addTaskInput.value = "";
     }
-  });
+  }
 
-  completeTaskBtn.addEventListener("click", () => {
-    addTaskListItem.removeChild(completeTaskBtn);
-    addTaskListItem.removeChild(removeTaskBtn);
-    addTaskListItem.appendChild(removeCompletedTaskBtn);
-    completedTaskList.appendChild(addTaskListItem);
-  });
-  removeCompletedTaskBtn.addEventListener("click", () => {
-    completedTaskList.removeChild(addTaskListItem);
-  });
+  createTaskItem(taskValue) {
+    const taskItem = document.createElement("li");
+    taskItem.textContent = taskValue;
 
-  resetBtn.addEventListener("click", () => {
-    addTaskList.removeChild(addTaskListItem);
-    completedTaskList.innerHTML = "";
-  });
-});
+    const changeTaskBtn = this.createButton("Change✏️", () =>
+      this.changeTask(taskItem)
+    );
+    const completeTaskBtn = this.createButton("Complete✅", () =>
+      this.completeTask(taskItem)
+    );
+    const removeTaskBtn = this.createButton("Remove❌", () =>
+      this.removeTask(taskItem)
+    );
 
-document
-  .getElementById("addTaskInput")
-  .addEventListener("keyup", function (event) {
+    taskItem.appendChild(changeTaskBtn);
+    taskItem.appendChild(completeTaskBtn);
+    taskItem.appendChild(removeTaskBtn);
+
+    taskItem.changeTaskBtn = changeTaskBtn;
+    taskItem.completeTaskBtn = completeTaskBtn;
+    taskItem.removeTaskBtn = removeTaskBtn;
+
+    return taskItem;
+  }
+
+  createButton(text, clickHandler) {
+    const button = document.createElement("button");
+    button.textContent = text;
+    button.addEventListener("click", clickHandler);
+    return button;
+  }
+
+  removeTask(taskItem) {
+    this.addTaskList.removeChild(taskItem);
+  }
+
+  changeTask(taskItem) {
+    const newTaskValue = this.addTaskInput.value.trim();
+
+    if (newTaskValue === "") {
+      this.showError("Får ej ändra till en tom syssla");
+    } else {
+      this.clearError();
+      taskItem.firstChild.textContent = newTaskValue;
+      this.addTaskInput.value = "";
+    }
+  }
+
+  completeTask(taskItem) {
+    taskItem.removeChild(taskItem.completeTaskBtn);
+    taskItem.removeChild(taskItem.removeTaskBtn);
+    const removeCompletedTaskBtn = this.createButton("Remove❌", () =>
+      this.removeCompletedTask(taskItem)
+    );
+    taskItem.appendChild(removeCompletedTaskBtn);
+    this.completedTaskList.appendChild(taskItem);
+  }
+
+  removeCompletedTask(taskItem) {
+    this.completedTaskList.removeChild(taskItem);
+  }
+
+  resetTasks() {
+    if (this.addTaskList.innerHTML === "") {
+      this.showError("Får ej återställa en tom lista");
+    } else {
+      this.addTaskList.innerHTML = "";
+      this.completedTaskList.innerHTML = "";
+    }
+  }
+
+  showError(message) {
+    this.errorMessages.innerHTML = message;
+  }
+
+  clearError() {
+    this.errorMessages.innerHTML = "";
+  }
+
+  handleKeyUp(event) {
     if (event.keyCode === 13) {
-      document.getElementById("addTaskBtn").click();
+      this.addTaskBtn.click();
     }
-  });
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  new TaskManager();
+});
